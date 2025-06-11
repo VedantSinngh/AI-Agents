@@ -1,0 +1,62 @@
+# First let's do an import
+from dotenv import load_dotenv
+
+# Next it's time to load the API keys into environment variables
+load_dotenv(override=True)
+
+# Check the keys
+
+import os
+groq_api_key = os.getenv('GROQ_API_KEY')
+
+if groq_api_key:
+    print(f"Groq API Key exists and begins {groq_api_key[:8]}")
+else:
+    print("Groq API Key not set - please head to the troubleshooting guide in the setup folder")
+    
+from groq import Groq
+
+client = Groq()
+
+messages = [ 
+    {
+        "role":"user",
+        "content":"Tell me a joke about programmers."
+    }
+]
+
+
+completion = client.chat.completions.create(
+    model="deepseek-r1-distill-llama-70b",
+    messages= messages,
+    temperature=0.6,
+    max_completion_tokens=4096,
+    top_p=0.95,
+    stream=True,
+    stop=None,
+)
+
+for chunk in completion:
+    print(chunk.choices[0].delta.content or "", end="")
+
+
+# And now - let's ask for a question:
+
+question = "Please propose a hard, challenging question to assess someone's IQ. Respond only with the question."
+messages = [{"role": "user", "content": question}]
+
+# ask it - this uses llama, still cheap but more powerful than nano
+
+response = client.chat.completions.create(
+    model="deepseek-r1-distill-llama-70b",
+    messages=messages
+)
+
+question = response.choices[0].message.content
+
+print(question)
+
+from IPython.display import Markdown, display
+
+display(Markdown(answer))
+
